@@ -4,7 +4,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export const metadata: Metadata = {
   title:
-    "SGG | Portail Public",
+    "SGG | Portail Admin",
   description: "This is Next.js Home for TailAdmin Dashboard Template",
 };
 

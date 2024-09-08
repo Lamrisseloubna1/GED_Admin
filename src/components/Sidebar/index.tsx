@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
@@ -45,7 +46,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Home",
-        route: "/",
+        route: "#",
       },
       {
         icon: (
@@ -86,6 +87,7 @@ const menuGroups = [
         label: "Users",
         route: "/users",
       },
+      
       {
         icon: (
           <svg
@@ -97,85 +99,136 @@ const menuGroups = [
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M10 2C8.34315 2 7 3.34315 7 5H2V19H22V5H17C17 3.34315 15.6569 2 14 2H10ZM15 5H9C9 4.44772 9.44772 4 10 4H14C14.5523 4 15 4.44772 15 5ZM20 7H4V17H20V7Z"
+              d="M14 2H6C4.89 2 4 2.89 4 4V20C4 21.1 4.89 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM14 3.5L18.5 8H14V3.5ZM6 20V4H13V9H18V20H6ZM8 15H16V17H8V15ZM8 11H16V13H8V11Z"
               fill=""
             />
           </svg>
         ),
         label: "Documents",
-        route: "/documents",
+        route: "/Documents",
+      },
+     
+      
+    ],
+  },
+  {
+    name: "OTHERS",
+    menuItems: [
+      
+      {
+        icon: (
+          <svg
+            className="fill-current"
+            width="18"
+            height="19"
+            viewBox="0 0 18 19"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g clipPath="url(#clip0_130_9814)">
+              <path
+                d="M12.7127 0.55835H9.53457C8.80332 0.55835 8.18457 1.1771 8.18457 1.90835V3.84897C8.18457 4.18647 8.46582 4.46772 8.80332 4.46772C9.14082 4.46772 9.45019 4.18647 9.45019 3.84897V1.88022C9.45019 1.82397 9.47832 1.79585 9.53457 1.79585H12.7127C13.3877 1.79585 13.9221 2.33022 13.9221 3.00522V15.0709C13.9221 15.7459 13.3877 16.2802 12.7127 16.2802H9.53457C9.47832 16.2802 9.45019 16.2521 9.45019 16.1959V14.2552C9.45019 13.9177 9.16894 13.6365 8.80332 13.6365C8.43769 13.6365 8.18457 13.9177 8.18457 14.2552V16.1959C8.18457 16.9271 8.80332 17.5459 9.53457 17.5459H12.7127C14.0908 17.5459 15.1877 16.4209 15.1877 15.0709V3.03335C15.1877 1.65522 14.0627 0.55835 12.7127 0.55835Z"
+                fill=""
+              />
+              <path
+                d="M10.4346 8.60205L7.62207 5.7333C7.36895 5.48018 6.97519 5.48018 6.72207 5.7333C6.46895 5.98643 6.46895 6.38018 6.72207 6.6333L8.46582 8.40518H3.45957C3.12207 8.40518 2.84082 8.68643 2.84082 9.02393C2.84082 9.36143 3.12207 9.64268 3.45957 9.64268H8.49395L6.72207 11.4427C6.46895 11.6958 6.46895 12.0896 6.72207 12.3427C6.83457 12.4552 7.00332 12.5114 7.17207 12.5114C7.34082 12.5114 7.50957 12.4552 7.62207 12.3145L10.4346 9.4458C10.6877 9.24893 10.6877 8.85518 10.4346 8.60205Z"
+                fill=""
+              />
+            </g>
+            <defs>
+              <clipPath id="clip0_130_9814">
+                <rect
+                  width="18"
+                  height="18"
+                  fill="white"
+                  transform="translate(0 0.052124)"
+                />
+              </clipPath>
+            </defs>
+          </svg>
+        ),
+        label: "Authentication",
+        route: "#",
+        children: [
+          { label: "Sign In", route: "/auth/signin" },
+          { label: "Sign Up", route: "/auth/signup" },
+        ],
       },
     ],
   },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
-  const [sidebarExpanded, setSidebarExpanded] = useLocalStorage(
-    "sidebar-expanded",
-    true
-  );
-  const trigger = useRef(null);
-  const sidebar = useRef(null);
-
-  const handleClickOutside = () => setSidebarOpen(false);
-
-  useEffect(() => {
-    const clickHandler = ({ target }: MouseEvent) => {
-      if (!sidebar.current || !trigger.current) return;
-      if (
-        !sidebarOpen ||
-        sidebar.current.contains(target as Node) ||
-        trigger.current.contains(target as Node)
-      )
-        return;
-      setSidebarOpen(false);
-    };
-
-    document.addEventListener("click", clickHandler);
-
-    return () => document.removeEventListener("click", clickHandler);
-  }, [sidebarOpen]);
-
-  useEffect(() => {
-    const keyHandler = ({ keyCode }: KeyboardEvent) => {
-      if (!sidebarOpen || keyCode !== 27) return;
-      setSidebarOpen(false);
-    };
-
-    document.addEventListener("keydown", keyHandler);
-
-    return () => document.removeEventListener("keydown", keyHandler);
-  }, [sidebarOpen]);
+  const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
 
   return (
-    <ClickOutside onClickOutside={handleClickOutside}>
-      <section
-        ref={sidebar}
-        className={`flex flex-col ${
-          sidebarOpen ? "w-64" : "w-20"
-        } bg-gray-800 h-full`}
-      >
-        <div className="flex flex-col items-center p-4">
-          {menuGroups.map((group) => (
-            <div key={group.name}>
-              <h4 className="text-white">{group.name}</h4>
-              {group.menuItems.map((item, idx) => (
-                <Link key={idx} href={item.route}>
-                  <SidebarItem
-                    label={item.label}
-                    icon={item.icon}
-                    active={pathname === item.route}
-                    expanded={sidebarExpanded}
-                  />
-                </Link>
-              ))}
-            </div>
-          ))}
+    <ClickOutside onClick={() => setSidebarOpen(false)}>
+      <aside
+        className={`fixed left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      > 
+        {/* <!-- SIDEBAR HEADER --> */}
+        <div className="flex items-center justify-between gap-2 px-8 py-2 lg:py-2">
+         {/* <Link href="/">
+            <Image
+              width={176}
+              height={32}
+              src={"/images/logo/logo.png"}
+              alt="Logo"
+              priority
+            />
+          </Link>
+
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-controls="sidebar"
+            className="block lg:hidden"
+          >
+            <svg
+              className="fill-current"
+              width="20"
+              height="18"
+              viewBox="0 0 20 18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M19 8.175H2.98748L9.36248 1.6875C9.69998 1.35 9.69998 0.825 9.36248 0.4875C9.02498 0.15 8.49998 0.15 8.16248 0.4875L0.399976 8.3625C0.0624756 8.7 0.0624756 9.225 0.399976 9.5625L8.16248 17.4375C8.31248 17.5875 8.53748 17.7 8.76248 17.7C8.98748 17.7 9.17498 17.625 9.36248 17.475C9.69998 17.1375 9.69998 16.6125 9.36248 16.275L3.02498 9.8625H19C19.45 9.8625 19.825 9.4875 19.825 9.0375C19.825 8.55 19.45 8.175 19 8.175Z"
+                fill=""
+              />
+            </svg>
+          </button>*/}
+         
         </div>
-      </section>
+        {/* <!-- SIDEBAR HEADER --> */}
+
+        <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+          {/* <!-- Sidebar Menu --> */}
+          <nav className="mt-3 px-4 py-1 lg:mt-1 lg:px-6">
+            {menuGroups.map((group, groupIndex) => (
+              <div key={groupIndex}>
+                <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+                  {group.name}
+                </h3>
+
+                <ul className="mb-6 flex flex-col gap-1.5">
+                  {group.menuItems.map((menuItem, menuIndex) => (
+                    <SidebarItem
+                      key={menuIndex}
+                      item={menuItem}
+                      pageName={pageName}
+                      setPageName={setPageName}
+                    />
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
+          {/* <!-- Sidebar Menu --> */}
+        </div>
+      </aside>
     </ClickOutside>
   );
 };
