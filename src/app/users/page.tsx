@@ -1,17 +1,37 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Table, Input, Button, Space, Pagination } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Table, Input, Button, Space, Pagination, message, Modal } from 'antd';
+import { SearchOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import { getAllUsers, deleteUser, User } from "@/services/utilisateurService"; // Import deleteUser
 
 const UsersPage: React.FC = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchText, setSearchText] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersData = await getAllUsers();
+        const filtered = usersData.filter(user => user.role === 'UTILISATEUR');
+        setUsers(filtered);
+        setFilteredUsers(filtered);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
   const handleSearch = (value: string) => {
     setSearchText(value);
+    const filtered = users.filter(user => user.nom.toLowerCase().includes(value.toLowerCase()));
+    setFilteredUsers(filtered);
   };
 
   const handlePageChange = (page: number, pageSize: number) => {
@@ -19,35 +39,49 @@ const UsersPage: React.FC = () => {
     setPageSize(pageSize);
   };
 
-  const dataSource = [
-    { key: '1', name: 'John Doe', age: 32, address: 'New York' },
-    { key: '2', name: 'Jane Smith', age: 28, address: 'London' },
-    // Add more users here...
-  ];
+  // Handle user deletion with confirmation
+  const handleDelete = (id: number) => {
+    Modal.confirm({
+      title: 'Are you sure you want to delete this user?',
+      icon: <ExclamationCircleOutlined />,
+      content: 'Once deleted, this user will not be able to recover.',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      async onOk() {
+        try {
+          await deleteUser(id);
+          message.success('User deleted successfully');
+          // Update the user list by removing the deleted user
+          const updatedUsers = users.filter(user => user.id !== id);
+          setUsers(updatedUsers);
+          setFilteredUsers(updatedUsers);
+        } catch (error) {
+          message.error('Failed to delete user');
+        }
+      },
+    });
+  };
 
   const columns = [
     {
       title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'nom',
+      key: 'nom',
     },
     {
-      title: 'Age',
-      dataIndex: 'age',
-      key: 'age',
-    },
-    {
-      title: 'Address',
-      dataIndex: 'address',
-      key: 'address',
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
     },
     {
       title: 'Actions',
       key: 'actions',
-      render: () => (
+      render: (_: any, record: User) => (
         <Space size="middle">
-          <Button>Edit</Button>
-          <Button>Delete</Button>
+          <Button type="primary" danger onClick={() => handleDelete(record.id)}>
+            Delete
+          </Button>
         </Space>
       ),
     },
@@ -64,23 +98,20 @@ const UsersPage: React.FC = () => {
             style={{ width: 200 }}
             prefix={<SearchOutlined />}
           />
-          <Button type="primary">Add User</Button>
         </div>
 
         <Table
-          dataSource={dataSource.filter((item) =>
-            item.name.toLowerCase().includes(searchText.toLowerCase())
-          )}
+          dataSource={filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
           columns={columns}
           pagination={false}
-          rowKey="key"
+          rowKey="id"
           style={{ marginBottom: '20px' }}
         />
 
         <Pagination
           current={currentPage}
           pageSize={pageSize}
-          total={dataSource.length}
+          total={filteredUsers.length}
           onChange={handlePageChange}
           style={{ textAlign: 'center' }}
         />

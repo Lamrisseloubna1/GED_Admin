@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname,useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
@@ -15,7 +15,7 @@ interface SidebarProps {
 
 const menuGroups = [
   {
-    name: "MENU",
+    name: "",
     menuItems: [
       {
         icon: (
@@ -46,7 +46,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Home",
-        route: "#",
+        route: "/home",
       },
       {
         icon: (
@@ -112,7 +112,7 @@ const menuGroups = [
     ],
   },
   {
-    name: "OTHERS",
+    name: "",
     menuItems: [
       
       {
@@ -160,7 +160,12 @@ const menuGroups = [
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
+  const router = useRouter();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
+  const handleLogout = () => {
+    sessionStorage.removeItem('user');
+    router.replace('/auth/signin'); // Redirect to sign-in page
+  };
 
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
@@ -171,42 +176,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       > 
         {/* <!-- SIDEBAR HEADER --> */}
         <div className="flex items-center justify-between gap-2 px-8 py-2 lg:py-2">
-         {/* <Link href="/">
-            <Image
+         
+          <Image
               width={176}
               height={32}
-              src={"/images/logo/logo.png"}
+              src={"/images/logo/logo2.png"}
               alt="Logo"
               priority
             />
-          </Link>
-
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-controls="sidebar"
-            className="block lg:hidden"
-          >
-            <svg
-              className="fill-current"
-              width="20"
-              height="18"
-              viewBox="0 0 20 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M19 8.175H2.98748L9.36248 1.6875C9.69998 1.35 9.69998 0.825 9.36248 0.4875C9.02498 0.15 8.49998 0.15 8.16248 0.4875L0.399976 8.3625C0.0624756 8.7 0.0624756 9.225 0.399976 9.5625L8.16248 17.4375C8.31248 17.5875 8.53748 17.7 8.76248 17.7C8.98748 17.7 9.17498 17.625 9.36248 17.475C9.69998 17.1375 9.69998 16.6125 9.36248 16.275L3.02498 9.8625H19C19.45 9.8625 19.825 9.4875 19.825 9.0375C19.825 8.55 19.45 8.175 19 8.175Z"
-                fill=""
-              />
-            </svg>
-          </button>*/}
-         
         </div>
         {/* <!-- SIDEBAR HEADER --> */}
 
         <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
           {/* <!-- Sidebar Menu --> */}
-          <nav className="mt-3 px-4 py-1 lg:mt-1 lg:px-6">
+          <nav className="mt-3 px-4 py-6 lg:mt-1 lg:px-6">
             {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
                 <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
@@ -225,8 +208,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </ul>
               </div>
             ))}
+
           </nav>
           {/* <!-- Sidebar Menu --> */}
+        </div>
+        <div className="absolute bottom-0 w-full px-4 py-8">
+          <button
+            onClick={handleLogout}
+            className="w-full font-semibold text-white bg-red-500 rounded hover:bg-red-600"
+          >
+            Logout
+          </button>
         </div>
       </aside>
     </ClickOutside>
